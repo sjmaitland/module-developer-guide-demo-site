@@ -1,0 +1,17 @@
+# Route definitions for the anytown module.
+
+# Each route needs a unique identifier. We recommend prefixing the route with the name of your module. Indented under the route name is the definition of the route. A routing.yml file can contain any number of routes.
+
+anytown.weather_page:
+  # The URL path where this page will be displayed. { style } represents a placeholder and will be populated by whatever is entered into that position of the URL. A routing.yml file can contain any number of routes. The result should be a path of /weather/extended or weather/short
+  path: '/weather/{style}'
+  defaults: 
+    # Title of the page used for things like the <title> tag.
+    _title: 'Weather at the Anytown Farmers Market'
+    # Defines which method, or which class, should be called to retrieve the content of the page.
+    _controller: '\Drupal\anytown\Controller\WeatherPage::build'
+    # /weather URL path default if { style } is not present
+    style: 'short'
+  requirements:
+    # What permissions a user needs to have in order to view this page. It's supposed to match the initial key on the anytown.permissions.yml file
+    _permission: 'view weekly weather'
