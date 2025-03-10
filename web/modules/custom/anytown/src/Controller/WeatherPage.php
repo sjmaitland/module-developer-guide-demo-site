@@ -48,30 +48,105 @@ class WeatherPage extends ControllerBase {
 
     $url = 'https://module-developer-guide-demo-site.ddev.site/modules/custom/anytown/data/weather_forecast.json';
     $forecast_data = $this->forecastClient->getForecastData($url);
+
+    $table_rows = [];
+    $highest = 0;
+    $lowest = 1000;
+
     if ($forecast_data) {
-      $forecast = '<ul>';
+      // Create a table of the weather forecast as a render array. First loop over the forecast data and create rows for the table.
       foreach ($forecast_data as $item) {
         [
           'weekday' => $weekday,
           'description' => $description,
           'high' => $high,
           'low' => $low,
+          'icon' => $icon,
         ] = $item;
-        $forecast .= "<li>$weekday will be <em>$description</em> with a high of $high and a low of $low.</li>";
+
+        $table_rows[] = [
+          // Simple text for a cell can be added directly to the array.
+          $weekday,
+          // Complex data for a cell, like HTML, can be represented as a nested render array.
+          [
+            'data' => [
+              '#markup' => '<img alt="' . $description . '" src="' . $icon . '" width="50" height="50" />',
+            ],
+          ],
+
+          [
+            'data' => [
+              '#markup' => $this->t('%description with a high of @high and a low of @low',
+                [
+                  '%description' => $description,
+                  '@high' => $high,
+                  '@low' => $low,
+                ]
+                ),
+            ],
+          ],
+        ];
+
+        $highest = max($highest, $high);
+        $lowest = min($lowest, $low);
       }
-      $forecast .= '</ul>';
+
+      $weather_forecast = [
+        '#type' => 'table',
+        '#header' => [
+          'Day',
+          '',
+          'Forecast',
+        ],
+        '#rows' => $table_rows,
+        '#attributes' => [
+          'class' => ['weather_page--forecast-table'],
+        ],
+      ];
+
+      // Summary forecast
+      $short_forecast = [
+        '#type' => 'markup',
+        '#markup' => '<p>' . $this->t('The high for the weekend is @highest and the low ist @lowest.',
+          [
+            '@highest' => $highest,
+            '@lowest' => $lowest,
+          ]
+        ) . '</p>',
+      ];
+
     }
     else {
-      $forecast = '<p>Could not get the weather forecast. Dress for anything.</p>';
+      // Or, display a message if we can't get the current forecast.
+      $weather_forecast = ['#markup' => '<p>' . $this->t('Could not get the weather forecast. Dress for anything.') . '</p>'];
+      $short_forecast = NULL;
     }
 
-    $output = "<p>Check out this weekend's weather forecast and come prepared. The market is mostly outside, and takes place rain or shine.</p>";
-    $output .= $forecast;
-    $output .= '<h3>Weather related closures</h3><ul><li>Ice rink closed until winter - please stay off while we prepare it.</li><li>Parking behind Apple Lane is still closed from all the rain last week.</li></ul>';
-
-    return [
-      '#markup' => $output,
+    $build = [
+      // Which theme hook to use for this content. See anytown_theme().
+      '#theme' => 'weather_page',
+      // Attach the CSS and JavaScript for the page.
+      '#attached' => [
+        'library' => ['anytown/forecast'],
+      ],
+      // When passing a render array to Twig template file, any top level array element that starts with a '#' will be a variable in the template file.
+      // Example: {{ weather_intro }}
+      '#weather_intro' => [
+        '#markup' => "<p>" . $this->t("Check out this weekend's weather forecast and come prepared. The market is mostly outside, and takes place rain or shine.") . "</p>",
+      ],
+      '#weather_forecast' => $weather_forecast,
+      '#short_forecast' => $short_forecast,
+      '#weather_closures' => [
+        '#theme' => 'item_list',
+        '#title' => $this->t('Weather related closures'),
+        '#items' => [
+          $this->t('Ice rink closed until winter - please stay off while we prepare it.'),
+          $this->t('Parking behind Apple Lane is still closed from all the rain last weekend.')
+        ],
+      ],
     ];
+
+    return $build;
   }
 
 }
