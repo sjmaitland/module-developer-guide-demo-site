@@ -63,15 +63,13 @@ final class SettingsForm extends ConfigFormBase {
    * { @inheritDoc }
    */
   public function validateForm(array &$form, FormStateInterface $form_state): void {
-    parent::validateForm($form, $form_state);
+    $this->config(self::SETTINGS)
+      ->set('display_forecast', $form_state->getValue('display_forecast'))
+      ->set('location', $form_state->getValue('location'))
+      ->set('weather_closures', $form_state->getValue('weather_closures'))
+      ->save();
 
-    // Verify that the location field contains an integer and that it is 5 digits long.
-    $location = $form_state->getValue('location');
-    $value = filter_var($location, FILTER_VALIDATE_INT);
-    if (!$value || strlen((string) $value) !== 5) {
-      // Set an error on the specific field. This will halt form processing and re-display the form with errors for the user to correct.
-      $form_state->setErrorByName('location', $this->t('Invalid zip code'));
-    }
+      $this->messenger()->addMessage($this->t('Anytown configuration updated.'));
 
   }
 
