@@ -14,9 +14,12 @@
      * @param string $url
      *  URL to use to retrieve forecast data. 
      * 
+     * @param boolean $reset_cache
+     *  If TRUE always retrieve fresh data from the API and do not use cached data.
+     * 
      * @return array|null
      *  An array containing the formatted data for the forecast, or null.
      */
 
-     public function getForecastData(string $url) : ?array;
+     public function getForecastData(string $url, bool $reset_cache) : ?array;
   }
