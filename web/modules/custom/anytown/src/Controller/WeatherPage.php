@@ -149,6 +149,14 @@ class WeatherPage extends ControllerBase {
         '#title' => $this->t('Weather related closures'),
         '#items' => explode(PHP_EOL, $settings->get('weather_closures')),
       ],
+      '#cache' => [
+        // This content will vary if the settings for the module change, so we specify that here using cache tags.
+        // This will end up looking like 'config:anytown.settings' but when available it's better to use the getCacheTags() method to retrieve tags rather than hard-code them
+        'tags' => $settings->getCacheTags(),
+
+        // Remember, this page can be accessed via multiple URLS, like /weather and /weather/extended. And varies depending on the URL, so we also need to add a cache context for the URL so that the content is cached per-url.
+        'contexts' => ['url'],
+      ],
     ];
 
     return $build;

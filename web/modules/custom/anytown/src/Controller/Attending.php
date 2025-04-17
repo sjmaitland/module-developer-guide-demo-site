@@ -53,6 +53,11 @@ class Attending extends ControllerBase {
         // The most common options here are likely 'label', and 'type' which should be the ID of a field formatter plugin to use. If not type is specified the field types `default_formatter` is used.
         $vendor_list[$vendor->id()]['contact'] = $vendor->get('field_vendor_contact_email')->view(['label' => 'hidden']);
 
+        // Add cache tags for the vendor to the render array so that if the vendor node gets edited this content gets invalidated.
+        $vendor_list[$vendor->id()]['#cache'] = [
+          'tags' => $vendor->getCacheTags(),
+        ];
+
         // Then, we also want to render the entire node, using the 'teaser' view mode. This will return the render array for displaying the node content.
         $vendor_teasers[$vendor->id()] = $view_builder->view($vendor, 'teaser');
       }
