@@ -98,7 +98,7 @@
     },
     "require-dev": {
         "drupal/coder": "^8.3",
-        "drupal/core-dev": "^11",
+        "drupal/core-dev": "^11.1",
         "drupal/devel": "^5.3",
         "drupal/webprofiler": "^10.1",
         "drush/drush": "^13.5"
